@@ -1,0 +1,42 @@
+name: Redeploy Application
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  redeploy:
+    name: Trigger Redeployment
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the latest code from the main branch
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Step 2: Set up SSH and deploy to the first VM
+      - name: Deploy to VM
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          VM_HOST: ${{ secrets.VM_HOST_ALL }}
+          VM_USER: ${{ secrets.VM_USER }}
+
+        run: |
+          # Start the SSH agent and add the SSH private key
+          eval "$(ssh-agent -s)"
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+
+          # Connect to the first VM and execute deployment commands
+          ssh -o StrictHostKeyChecking=no "$VM_USER@$VM_HOST" << 'EOF'
+            # Navigate to the project directory
+            cd backend_v2
+
+            # Pull the latest changes from the master branch
+            git pull origin master
+
+            # Restart the Docker containers
+            docker-compose pull
+            docker-compose down --volumes --remove-orphans
+            docker-compose up -d --build
+          EOF
