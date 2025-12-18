@@ -4,7 +4,7 @@ from users.models import UserProfile
 class BlogPost(models.Model):
     title = models.CharField(max_length=255)
     body = models.TextField()
-    cover_photo = models.ImageField(upload_to='blog_covers/')
+    cover_photo = models.ImageField(upload_to='blog_covers/', blank=True, null=True)
     author = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='blog_posts')
     likes = models.ManyToManyField(UserProfile, related_name='liked_posts', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

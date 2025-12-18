@@ -22,6 +22,11 @@ class UserSignupSerializer(serializers.ModelSerializer):
             "profile",
         )
 
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("Username already exists")
+        return value
+
     def create(self, validated_data):
         profile_data = validated_data.pop("profile")
 
@@ -61,9 +66,6 @@ class LoginSerializer(serializers.Serializer):
             "refresh": str(refresh),
         }
 
-class LogoutSerializer(serializers.Serializer):
-    def save(self, **kwargs):
-        request = self.context["request"]
-        request.user.auth_token.delete()
+
 
 
