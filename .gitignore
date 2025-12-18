@@ -13,7 +13,6 @@ app/.env
 */__pycache__/
 
 db.sqlite3
-**/*.md
 app/.env
 app/.env
 .DS_Store
